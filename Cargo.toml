@@ -1,0 +1,13 @@
+[package]
+name = "okoa_rent_restful"
+version = "0.1.0"
+authors = ["lastemp <emmanuelochieng797@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+actix-web = "3"
+serde = { version = "1.0", features = ["derive"] }
+base64 = "0.13.0"
+mysql = "20.1.0"
