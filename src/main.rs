@@ -818,15 +818,9 @@ async fn process_ussd_actions(form: web::Form<InputData>, data: web::Data<Pool>)
 	let service_code = &form.serviceCode.as_ref().unwrap_or(&k);
 	let text = &form.text.as_ref().unwrap_or(&k);
 	
-	//println!("process_ussd_actions: session_id - {:?}", session_id);
-	//println!("process_ussd_actions: phone_number - {:?}", phone_number);
-	//println!("process_ussd_actions: network_code - {:?}", network_code);
-	//println!("process_ussd_actions: service_code - {:?}", service_code);
-	//println!("process_ussd_actions: text - {:?}", text);
-	
 	let phone_number = phone_number.replace("+","");
 	
-	let is_registered = get_ussd_registered_client(&phone_number);
+	let is_registered = get_ussd_registered_client(&data, &phone_number);
 	
 	if is_registered {
 		let response_data = process_client_requests(&data, session_id, &phone_number, service_code, text);
@@ -834,7 +828,7 @@ async fn process_ussd_actions(form: web::Form<InputData>, data: web::Data<Pool>)
 		return response_data
 	}
 	else {
-		let response_data = process_unregistered_client_requests(session_id, &phone_number, service_code, text);
+		let response_data = process_unregistered_client_requests(&data, session_id, &phone_number, service_code, text);
 		
 		return response_data
 	}
@@ -851,7 +845,6 @@ fn get_menu_data() -> String {
 	let menu_5 = String::from("5. Get Statement");
 	
 	menu_data.push_str(&welcome_message_1);
-	//menu_data.push_str("\n");
 	menu_data.push_str(&welcome_message_2);
 	menu_data.push_str("\n");
 		
@@ -872,10 +865,9 @@ fn get_menu_data_unregistered_client() -> String {
 	let mut menu_data = String::from("");
 	let welcome_message_1 = String::from("Welcome to Okoa Rent\\Mortgage Service, ");
 	let welcome_message_2 = String::from("a Real Estate Industry Revolution.");
-	let menu_1 = String::from("Please enter your National ID number to proceed.");
+	let menu_1 = String::from("1. Self Register");
 		
 	menu_data.push_str(&welcome_message_1);
-	menu_data.push_str("\n");
 	menu_data.push_str(&welcome_message_2);
 	menu_data.push_str("\n");
 	menu_data.push_str(&menu_1);
@@ -883,7 +875,7 @@ fn get_menu_data_unregistered_client() -> String {
 	menu_data
 }
 
-fn get_menu_1_sub_menu_data(text: &String) -> String {
+fn get_menu_1_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &String) -> String {
 		
 	if text.replace(" ","").len() == 0 {
 		let response_data = "Please note that you made a wrong selection.";
@@ -1131,6 +1123,18 @@ fn get_menu_1_sub_menu_data(text: &String) -> String {
 							let sub_menu_2 = String::from("It is being processed and you will be notified once complete.");
 							let sub_menu_3 = String::from("Thank you.");
 							
+							let tenant_code = String::from(v[1]);
+							let house_code = String::from(v[2]);
+							let amount_s = String::from(v[3]);
+							
+							let amount = 
+								match amount_s.parse::<i32>() {
+								  Ok(a) => a,
+								  Err(e) => 0,
+							};
+							
+							create_okoa_rent_data(data, tenant_code, house_code, amount, mobile_no.to_string());
+							
 							sub_menu_data.push_str(&sub_menu_1);
 							sub_menu_data.push_str("\n");
 							sub_menu_data.push_str(&sub_menu_2);
@@ -1187,7 +1191,7 @@ fn get_menu_1_sub_menu_data(text: &String) -> String {
 	}
 }
 
-fn get_menu_2_sub_menu_data(text: &String) -> String {
+fn get_menu_2_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &String) -> String {
 		
 	if text.replace(" ","").len() == 0 {
 		let response_data = "Please note that you made a wrong selection.";
@@ -1397,6 +1401,18 @@ fn get_menu_2_sub_menu_data(text: &String) -> String {
 							let sub_menu_2 = String::from("It is being processed and you will be notified once complete.");
 							let sub_menu_3 = String::from("Thank you.");
 							
+							let mortgagor_code = String::from(v[1]);
+							let house_code = String::from(v[2]);
+							let amount_s = String::from(v[3]);
+							
+							let amount = 
+								match amount_s.parse::<i32>() {
+								  Ok(a) => a,
+								  Err(e) => 0,
+							};
+							
+							create_okoa_mortgage_data(data, mortgagor_code, house_code, amount, mobile_no.to_string());
+							
 							sub_menu_data.push_str(&sub_menu_1);
 							sub_menu_data.push_str("\n");
 							sub_menu_data.push_str(&sub_menu_2);
@@ -1427,7 +1443,7 @@ fn get_menu_2_sub_menu_data(text: &String) -> String {
 	}
 }
 
-fn get_menu_3_sub_menu_data(text: &String) -> String {
+fn get_menu_3_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &String) -> String {
 		
 	if text.replace(" ","").len() == 0 {
 		let response_data = "Please note that you made a wrong selection.";
@@ -1556,6 +1572,10 @@ fn get_menu_3_sub_menu_data(text: &String) -> String {
 							//let sub_menu_5 = String::from("Enter 00 to go to previous Menu");
 							let sub_menu_5 = String::from("0:Back 00:Home");
 							
+							let rent_mortgage_code = String::from(v[1]);
+							
+							create_check_balance_data(data, rent_mortgage_code, mobile_no.to_string());
+							
 							sub_menu_data.push_str(&sub_menu_1);
 							sub_menu_data.push_str(&sub_menu_2);
 							sub_menu_data.push_str(&sub_menu_3);
@@ -1587,7 +1607,7 @@ fn get_menu_3_sub_menu_data(text: &String) -> String {
 	}
 }
 
-fn get_menu_4_sub_menu_data(text: &String) -> String {
+fn get_menu_4_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &String) -> String {
 		
 	if text.replace(" ","").len() == 0 {
 		let response_data = "Please note that you made a wrong selection.";
@@ -1768,6 +1788,17 @@ fn get_menu_4_sub_menu_data(text: &String) -> String {
 							let sub_menu_1 = String::from("Dear Customer, please note that you will get a prompt to enter Mpesa Pin to complete the transaction.");
 							let sub_menu_2 = String::from("Thank you.");
 							
+							let rent_mortgage_code = String::from(v[1]);
+							let amount_s = String::from(v[2]);
+							
+							let amount = 
+								match amount_s.parse::<i32>() {
+								  Ok(a) => a,
+								  Err(e) => 0,
+							};
+							
+							create_pay_back_data(data, rent_mortgage_code, amount, mobile_no.to_string());
+							
 							sub_menu_data.push_str(&sub_menu_1);
 							sub_menu_data.push_str("\n");
 							sub_menu_data.push_str(&sub_menu_2);
@@ -1796,7 +1827,7 @@ fn get_menu_4_sub_menu_data(text: &String) -> String {
 	}
 }
 
-fn get_menu_5_sub_menu_data(text: &String) -> String {
+fn get_menu_5_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &String) -> String {
 		
 	if text.replace(" ","").len() == 0 {
 		let response_data = "Please note that you made a wrong selection.";
@@ -1908,6 +1939,23 @@ fn get_menu_5_sub_menu_data(text: &String) -> String {
 							let sub_menu_2 = String::from("It is being processed and you will be notified once complete.");
 							let sub_menu_3 = String::from("Thank you.");
 							
+							let input = String::from(v[1]);
+							let mut full_statement: bool = false;
+							let mut mini_statement: bool = false;
+							
+							if input.eq("1") {
+								full_statement = true;
+							}
+							else if input.eq("2") {
+								mini_statement = true;
+							}
+							else {
+								full_statement = false;
+								mini_statement = false;
+							}
+							
+							create_get_statement_data(data, full_statement, mini_statement, mobile_no.to_string());
+							
 							sub_menu_data.push_str(&sub_menu_1);
 							sub_menu_data.push_str("\n");
 							sub_menu_data.push_str(&sub_menu_2);
@@ -1938,7 +1986,194 @@ fn get_menu_5_sub_menu_data(text: &String) -> String {
 	}
 }
 
-fn get_sub_menu_data(text: &String) -> String {
+fn get_menu_1_sub_menu_data_unregistered_client(data: &web::Data<Pool>, mobile_no: &String, text: &String) -> String {
+		
+	if text.replace(" ","").len() == 0 {
+		let response_data = "Please note that you made a wrong selection.";
+		let response_data = generate_ussd_response_message(&response_data.to_string(), false);
+		
+		return response_data.to_string()
+		
+	}
+	else if !text.contains("*") {
+		let mut sub_menu_data = String::from("");
+		let sub_menu_1 = String::from("Enter National ID number");
+		let sub_menu_2 = String::from("0:Back 00:Home");
+		
+		sub_menu_data.push_str(&sub_menu_1);
+		sub_menu_data.push_str("\n");
+		sub_menu_data.push_str(&sub_menu_2);
+		
+		let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
+		return sub_menu_data.to_string()
+	}
+	else {
+		let v: Vec<&str> = text.split('*').collect();
+		
+		let vector_length = v.len();
+		
+		if vector_length == 0 {
+			let response_data = "Please note that you made a wrong selection.";
+			let response_data = generate_ussd_response_message(&response_data.to_string(), false);
+
+			return response_data.to_string()
+		}
+		
+		let wrong_selection_data = "Please note that you made a wrong selection.";
+		
+		let response_data = 
+			match vector_length {
+				2 => //Index 1
+					{
+						let national_id = String::from(v[1]);
+						
+						if national_id.replace(" ","").len() == 0 {
+							let response_data = "Please note that you did not enter national ID number.";
+							let response_data = generate_ussd_response_message(&response_data.to_string(), false);
+			
+							return response_data.to_string()
+						}
+						
+						let mut sub_menu_data = String::from("");
+						let sub_menu_1 = String::from("Enter Full Names");
+						let sub_menu_2 = String::from("eg Firstname Lastname");
+						let sub_menu_3 = String::from("0:Back 00:Home");
+						
+						sub_menu_data.push_str(&sub_menu_1);
+						sub_menu_data.push_str("\n");
+						sub_menu_data.push_str(&sub_menu_2);
+						sub_menu_data.push_str("\n");
+						sub_menu_data.push_str(&sub_menu_3);
+						
+						let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
+						return sub_menu_data.to_string()
+					},
+				3 => //Index 2
+					{
+						let full_names = String::from(v[2]);
+						
+						if full_names.replace(" ","").len() == 0 {
+							let response_data = "Please note that you did not enter full names.";
+							let response_data = generate_ussd_response_message(&response_data.to_string(), false);
+			
+							return response_data.to_string()
+						}
+						
+						let mut sub_menu_data = String::from("");
+						let sub_menu_1 = String::from("Enter House Code");
+						let sub_menu_2 = String::from("0:Back 00:Home");
+						
+						sub_menu_data.push_str(&sub_menu_1);
+						sub_menu_data.push_str("\n");
+						sub_menu_data.push_str(&sub_menu_2);
+						
+						let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
+						return sub_menu_data.to_string()
+					},
+						
+				4 => //Index 3
+					{
+						let house_code = String::from(v[3]);
+						
+						if house_code.replace(" ","").len() == 0 {
+							let response_data = "Please note that you did not enter house code.";
+							let response_data = generate_ussd_response_message(&response_data.to_string(), false);
+			
+							return response_data.to_string()
+						}
+						
+						let national_id = String::from(v[1]);
+						let full_names = String::from(v[2]);
+						
+						let mut sub_menu_data = String::from("");
+						let sub_menu_1 = String::from("Please confirm self registration details.");
+						let sub_menu_2 = String::from("1. Cancel");
+						let sub_menu_3 = String::from("2. Send");
+						
+						sub_menu_data.push_str(&sub_menu_1);
+						sub_menu_data.push_str("\n");
+						sub_menu_data.push_str(&String::from("National ID: "));
+						sub_menu_data.push_str(&national_id);
+						sub_menu_data.push_str("\n");
+						sub_menu_data.push_str(&String::from("Full Names: "));
+						sub_menu_data.push_str(&full_names);
+						sub_menu_data.push_str("\n");
+						sub_menu_data.push_str(&String::from("House Code: "));
+						sub_menu_data.push_str(&house_code);
+						sub_menu_data.push_str(&String::from("."));
+						sub_menu_data.push_str("\n");
+						sub_menu_data.push_str(&sub_menu_2);
+						sub_menu_data.push_str("\n");
+						sub_menu_data.push_str(&sub_menu_3);
+						
+						let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
+						return sub_menu_data.to_string()
+					},	
+				5 => //Index 4
+					{	
+						let input = String::from(v[4]);
+						
+						if input.replace(" ","").len() == 0 {
+							let response_data = wrong_selection_data.to_string();
+							let response_data = generate_ussd_response_message(&response_data, false);
+			
+							return response_data.to_string()
+						}
+						
+						let mut sub_menu_data = String::from("");
+						
+						if input.eq("1") {
+							sub_menu_data = String::from("Please note that you you cancelled the request.");
+							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, false);
+							return sub_menu_data.to_string()
+						}
+						else if input.eq("2") {
+							let sub_menu_1 = String::from("Dear Customer, we acknowledge receipt of your self registration submission.");
+							let sub_menu_2 = String::from("It is being processed and you will be notified once complete.");
+							let sub_menu_3 = String::from("Thank you.");
+							
+							let national_id = String::from(v[1]);
+							let full_names = String::from(v[2]);
+							let house_code = String::from(v[3]);
+							
+							create_self_registration_data(data, national_id, full_names, house_code, mobile_no.to_string());
+							
+							sub_menu_data.push_str(&sub_menu_1);
+							sub_menu_data.push_str("\n");
+							sub_menu_data.push_str(&sub_menu_2);
+							sub_menu_data.push_str("\n");
+							sub_menu_data.push_str(&sub_menu_3);
+							
+							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, false);
+							
+							return sub_menu_data.to_string()
+						}
+						else {
+							sub_menu_data = wrong_selection_data.to_string();
+							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, false);
+							
+							return sub_menu_data.to_string()
+						}
+						
+					},
+						
+				_ => {
+					let response_data = wrong_selection_data.to_string();
+					let response_data = generate_ussd_response_message(&response_data, false);
+			
+					return response_data.to_string()
+					},
+        };
+		
+		return response_data
+	}
+}
+
+fn get_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &String) -> String {
 	
 	if text.replace(" ","").len() == 0 {
 		let response_data = "Please note that you made a wrong selection.";
@@ -1967,15 +2202,15 @@ fn get_sub_menu_data(text: &String) -> String {
 		let response_data = 
 			match menu_selected.as_str() {
 				"1" => //menu_1
-						get_menu_1_sub_menu_data(text),
+						get_menu_1_sub_menu_data(data, mobile_no, text),
 				"2" => //menu_2
-						get_menu_2_sub_menu_data(text),
+						get_menu_2_sub_menu_data(data, mobile_no, text),
 			    "3" => //menu_3
-						get_menu_3_sub_menu_data(text),
+						get_menu_3_sub_menu_data(data, mobile_no, text),
 				"4" => //menu_4
-						get_menu_4_sub_menu_data(text),
+						get_menu_4_sub_menu_data(data, mobile_no, text),
 			    "5" => //menu_5
-						get_menu_5_sub_menu_data(text),
+						get_menu_5_sub_menu_data(data, mobile_no, text),
 				_ => wrong_selection_data.to_string(),
         };
 		
@@ -1989,15 +2224,15 @@ fn get_sub_menu_data(text: &String) -> String {
 		let response_data = 
 			match text.as_str() {
 				"1" => //menu_1
-					get_menu_1_sub_menu_data(text),
+					get_menu_1_sub_menu_data(data, mobile_no, text),
 				"2" => //menu_2
-					get_menu_2_sub_menu_data(text),
+					get_menu_2_sub_menu_data(data, mobile_no, text),
 			    "3" => //menu_3
-					get_menu_3_sub_menu_data(text),
+					get_menu_3_sub_menu_data(data, mobile_no, text),
 				"4" => //menu_4
-					get_menu_4_sub_menu_data(text),
+					get_menu_4_sub_menu_data(data, mobile_no, text),
 			    "5" => //menu_5
-					get_menu_5_sub_menu_data(text),
+					get_menu_5_sub_menu_data(data, mobile_no, text),
 				_ => wrong_selection_data.to_string(),
         };
 		
@@ -2005,19 +2240,78 @@ fn get_sub_menu_data(text: &String) -> String {
 	}
 }
 
-fn get_ussd_registered_client(phone_number: &String) -> bool {
+fn get_sub_menu_data_unregistered_client(data: &web::Data<Pool>, mobile_no: &String, text: &String) -> String {
+	
+	if text.replace(" ","").len() == 0 {
+		let response_data = "Please note that you made a wrong selection.";
+		let response_data = generate_ussd_response_message(&response_data.to_string(), false);
+		
+		return response_data.to_string()
+	}
+	
+	if text.contains("*") {
+		let v: Vec<&str> = text.split('*').collect();
+		
+		let vector_length = v.len();
+		
+		if vector_length == 0 {
+			let response_data = "Please note that you made a wrong selection.";
+			let response_data = generate_ussd_response_message(&response_data.to_string(), false);
+
+			return response_data.to_string()
+		}
+		
+		let wrong_selection_data = "Please note that you made a wrong selection.";
+		let menu_selected = String::from(v[0]);
+		
+		let response_data = 
+			match menu_selected.as_str() {
+				"1" => //menu_1
+						get_menu_1_sub_menu_data_unregistered_client(data, mobile_no, text),
+				_ => wrong_selection_data.to_string(),
+        };
+		
+		return response_data
+	}
+	else {
+		let wrong_selection_data = "Please note that you made a wrong selection.";
+	
+		let response_data = 
+			match text.as_str() {
+				"1" => //menu_1
+					get_menu_1_sub_menu_data_unregistered_client(data, mobile_no, text),
+				_ => wrong_selection_data.to_string(),
+        };
+		
+		return response_data
+	}
+}
+
+fn get_ussd_registered_client(data: &web::Data<Pool>, phone_number: &String) -> bool {
 	let mut is_registered: bool = false;
+	/*
 	let a_1 = String::from("254723083761");
 	
 	if phone_number.replace(" ","").len() == 0 {return is_registered}
 	
-	//println!("get_ussd_registered_client: is_registered 1 - {:?}", is_registered.to_string());
-	
 	if phone_number.to_lowercase().eq(&a_1) {
 		is_registered = true;
 	}
-	
-	//println!("get_ussd_registered_client: is_registered 2 - {:?}", is_registered.to_string());
+	*/
+	match data
+        .get_conn()
+		.and_then(|mut conn| select_registered_client_details(&mut conn, phone_number.to_string()))
+    {
+        Ok(x) => {
+			if x > 0 {
+				is_registered = true;
+			}
+			else {
+				is_registered = false;
+			}
+        },
+        Err(e) => println!("Failed to open DB connection. {:?}", e),
+    }
 	
 	is_registered
 }
@@ -2027,8 +2321,10 @@ fn process_client_requests(data: &web::Data<Pool>, session_id: &String, phone_nu
 	let text = text.replace("'","");
 	let text = text.replace("--","");
 	let text = text.replace(" ","");
+	
 	//let caller_action: String = create_ussd_session_details_2(data, session_id.to_string(), phone_number.to_string(), text.to_string());
 	create_ussd_session_details(data, session_id.to_string(), phone_number.to_string(), text.to_string());
+	
 	let caller_action: String = get_ussd_session_details(data, &session_id, &phone_number);
 	
 	let caller_action = caller_action.replace(" ","");
@@ -2041,24 +2337,34 @@ fn process_client_requests(data: &web::Data<Pool>, session_id: &String, phone_nu
 	}
 	else {
 		//Lets process sub menu selection by user
-		//let response_data = get_sub_menu_data(text);
-		let response_data = get_sub_menu_data(&caller_action);
+		let response_data = get_sub_menu_data(&data, &phone_number, &caller_action);
 		
 		return response_data
 	}
 }
 
-fn process_unregistered_client_requests(session_id: &String, phone_number: &String, service_code: &String, text: &String) -> String {
+fn process_unregistered_client_requests(data: &web::Data<Pool>, session_id: &String, phone_number: &String, service_code: &String, text: &String) -> String {
 	
-	if text.replace(" ","").len() == 0 {
+	let text = text.replace("'","");
+	let text = text.replace("--","");
+	//let text = text.replace(" ","");
+	let text = text.replace("  "," ");
+	
+	create_ussd_session_details(data, session_id.to_string(), phone_number.to_string(), text.to_string());
+	
+	let caller_action: String = get_ussd_session_details(data, &session_id, &phone_number);
+	
+	let caller_action = caller_action.replace("  "," ");
+	
+	if caller_action.replace(" ","").len() == 0 {
 		let response_data = get_menu_data_unregistered_client();
 		let response_data = generate_ussd_response_message(&response_data, true);
 		
 		return response_data
 	}
 	else {
-		//Lets process menu selection by user
-		let response_data = String::from("Please select submenu to proceed");
+		//Lets process sub menu selection by user
+		let response_data = get_sub_menu_data_unregistered_client(&data, &phone_number, &caller_action);
 		
 		return response_data
 	}
@@ -2382,6 +2688,98 @@ fn insert_ussd_session_details_2(
 	.and_then(|_| Ok(caller_action_new))
 }
 
+fn insert_okoa_rent_data(
+    conn: &mut PooledConn, tenant_code: String, house_code: String, amount: i32, mobile_no: String) -> std::result::Result<u64, mysql::error::Error> {
+	
+	// Now let's insert data to the database
+	conn.exec_drop(
+        "insert into incomingokoarentdatarequests (tenantcode, housecode, amount, mobileno) values (:tenant_code, :house_code, :amount, :mobile_no);",
+        params! {
+            "tenant_code" => tenant_code,
+            "house_code" => house_code,
+            "amount" => amount,
+            "mobile_no" => mobile_no,
+        },
+    )
+	.and_then(|_| Ok(conn.last_insert_id()))
+}
+
+fn insert_okoa_mortgage_data(
+    conn: &mut PooledConn, mortgagor_code: String, house_code: String, amount: i32, mobile_no: String) -> std::result::Result<u64, mysql::error::Error> {
+	
+	// Now let's insert data to the database
+	conn.exec_drop(
+        "insert into incomingokoamortgagedatarequests (mortgagorcode, housecode, amount, mobileno) values (:mortgagor_code, :house_code, :amount, :mobile_no);",
+        params! {
+            "mortgagor_code" => mortgagor_code,
+            "house_code" => house_code,
+            "amount" => amount,
+            "mobile_no" => mobile_no,
+        },
+    )
+	.and_then(|_| Ok(conn.last_insert_id()))
+}
+
+fn insert_check_balance_data(
+    conn: &mut PooledConn, rent_mortgage_code: String, mobile_no: String) -> std::result::Result<u64, mysql::error::Error> {
+	
+	// Now let's insert data to the database
+	conn.exec_drop(
+        "insert into incomingcheckbalancedatarequests (rentmortgagecode, mobileno) values (:rent_mortgage_code, :mobile_no);",
+        params! {
+            "rent_mortgage_code" => rent_mortgage_code,
+            "mobile_no" => mobile_no,
+        },
+    )
+	.and_then(|_| Ok(conn.last_insert_id()))
+}
+
+fn insert_get_statement_data(
+    conn: &mut PooledConn, full_statement: bool, mini_statement: bool, mobile_no: String) -> std::result::Result<u64, mysql::error::Error> {
+	
+	// Now let's insert data to the database
+	conn.exec_drop(
+        "insert into incominggetstatementdatarequests (fullstatement, ministatement, mobileno) values (:full_statement, :mini_statement, :mobile_no);",
+        params! {
+            "full_statement" => full_statement,
+			"mini_statement" => mini_statement,
+            "mobile_no" => mobile_no,
+        },
+    )
+	.and_then(|_| Ok(conn.last_insert_id()))
+}
+
+fn insert_pay_back_data(
+    conn: &mut PooledConn, rent_mortgage_code: String, amount: i32, mobile_no: String) -> std::result::Result<u64, mysql::error::Error> {
+	
+	// Now let's insert data to the database
+	conn.exec_drop(
+        "insert into incomingpaybackdatarequests (rentmortgagecode, amount, mobileno) values (:rent_mortgage_code, :amount, :mobile_no);",
+        params! {
+            "rent_mortgage_code" => rent_mortgage_code,
+            "amount" => amount,
+            "mobile_no" => mobile_no,
+        },
+    )
+	.and_then(|_| Ok(conn.last_insert_id()))
+}
+
+fn insert_self_registration_data(
+    conn: &mut PooledConn, national_id_no: String, full_names: String, house_code: String, mobile_no: String) -> std::result::Result<u64, mysql::error::Error> {
+	
+	// Now let's insert data to the database
+	conn.exec_drop(
+        "insert into incomingselfregistrationdatarequests (nationalidno, fullnames, housecode, mobileno) values (:national_id_no, :full_names, :house_code, :mobile_no);",
+        params! {
+            "national_id_no" => national_id_no,
+            "full_names" => full_names,
+            "house_code" => house_code,
+            "mobile_no" => mobile_no,
+        },
+    )
+	.and_then(|_| Ok(conn.last_insert_id()))
+}
+
 fn create_sales_commission_data(data: web::Data<Pool>, batch_no: i32) -> bool {
 	let mut successful: bool = false;
 	
@@ -2431,6 +2829,132 @@ fn create_ussd_session_details_2(data: &web::Data<Pool>, session_id: String, cal
 	caller_action_new
 }
 
+fn create_okoa_rent_data(data: &web::Data<Pool>, tenant_code: String, house_code: String, amount: i32, mobile_no: String) -> bool  {
+	let mut successful: bool = false;
+	
+	match data
+        .get_conn()
+		.and_then(|mut conn| insert_okoa_rent_data(&mut conn, tenant_code, house_code, amount, mobile_no))
+    {
+        Ok(x) => {
+			if x > 0 {
+				successful = true;
+			}
+			else {
+				successful = false;
+			}
+        },
+        Err(e) => println!("Failed to open DB connection. {:?}", e),
+    }
+	
+	successful
+}
+
+fn create_okoa_mortgage_data(data: &web::Data<Pool>, mortgagor_code: String, house_code: String, amount: i32, mobile_no: String) -> bool  {
+	let mut successful: bool = false;
+	
+	match data
+        .get_conn()
+		.and_then(|mut conn| insert_okoa_mortgage_data(&mut conn, mortgagor_code, house_code, amount, mobile_no))
+    {
+        Ok(x) => {
+			if x > 0 {
+				successful = true;
+			}
+			else {
+				successful = false;
+			}
+        },
+        Err(e) => println!("Failed to open DB connection. {:?}", e),
+    }
+	
+	successful
+}
+
+fn create_check_balance_data(data: &web::Data<Pool>, rent_mortgage_code: String, mobile_no: String) -> bool  {
+	let mut successful: bool = false;
+	
+	match data
+        .get_conn()
+		.and_then(|mut conn| insert_check_balance_data(&mut conn, rent_mortgage_code, mobile_no))
+    {
+        Ok(x) => {
+			if x > 0 {
+				successful = true;
+			}
+			else {
+				successful = false;
+			}
+        },
+        Err(e) => println!("Failed to open DB connection. {:?}", e),
+    }
+	
+	successful
+}
+
+fn create_get_statement_data(data: &web::Data<Pool>, full_statement: bool, mini_statement: bool, mobile_no: String) -> bool  {
+	let mut successful: bool = false;
+	
+	match data
+        .get_conn()
+		.and_then(|mut conn| insert_get_statement_data(&mut conn, full_statement, mini_statement, mobile_no))
+    {
+        Ok(x) => {
+			if x > 0 {
+				successful = true;
+			}
+			else {
+				successful = false;
+			}
+        },
+        Err(e) => println!("Failed to open DB connection. {:?}", e),
+    }
+	
+	successful
+}
+
+fn create_pay_back_data(data: &web::Data<Pool>, rent_mortgage_code: String, amount: i32, mobile_no: String) -> bool  {
+	let mut successful: bool = false;
+	
+	match data
+        .get_conn()
+		.and_then(|mut conn| insert_pay_back_data(&mut conn, rent_mortgage_code, amount, mobile_no))
+    {
+        Ok(x) => {
+			if x > 0 {
+				successful = true;
+			}
+			else {
+				successful = false;
+			}
+        },
+        Err(e) => println!("Failed to open DB connection. {:?}", e),
+    }
+	
+	successful
+}
+
+fn create_self_registration_data(data: &web::Data<Pool>, national_id_no: String, full_names: String, house_code: String, mobile_no: String) -> bool  {
+	let mut successful: bool = false;
+	
+	match data
+        .get_conn()
+		.and_then(|mut conn| insert_self_registration_data(&mut conn, national_id_no, full_names, house_code, mobile_no))
+    {
+        Ok(x) => {
+			if x > 0 {
+				successful = true;
+			}
+			else {
+				successful = false;
+			}
+        },
+        Err(e) => println!("Failed to open DB connection. {:?}", e),
+    }
+	
+	successful
+}
+
 fn select_ussd_session_details(
     conn: &mut PooledConn, session_id: String, caller_number: String) -> std::result::Result<String, mysql::error::Error> {
 	let mut caller_action_new: String = String::from("");
@@ -2445,23 +2969,24 @@ fn select_ussd_session_details(
             caller_action_new = calleraction;
         },
     )
-	.and_then(|_| Ok(1));
+	.and_then(|_| Ok(caller_action_new))
 	
-	/*
-	conn.exec_map(
-	"select coalesce(calleraction,'') as calleractionnew from ussdsessiondetails where coalesce(sessionid,'') = :sessionid and coalesce(callernumber,'') = :callernumber and coalesce(duplicateentry,0) = 0 and coalesce(deleted,0) = 0 limit 1;",
-	params! {
-			"sessionid" => session_id,
-			"callernumber" => caller_number,
-		},
-	|(calleractionnew)| { 
-			caller_action_new = calleractionnew;
-		},
-	)
-	.and_then(|_| Ok(1));
-	*/
+}
+
+fn select_registered_client_details(
+    conn: &mut PooledConn, mobile_number: String) -> std::result::Result<u64, mysql::error::Error> {
+	let mut my_count: u64 = 0;
 	
-	Ok(caller_action_new)
+    conn.exec_map(
+        "select count(id) as mycount from incomingselfregistrationdatarequests where coalesce(mobileno,'') = :mobileno and coalesce(duplicateentry,0) = 0 and coalesce(deleted,0) = 0;",
+		params! {
+				"mobileno" => mobile_number,
+			},
+        |(mycount)| {
+            my_count = mycount;
+        },
+    )
+	.and_then(|_| Ok(my_count))
 	
 }
 
