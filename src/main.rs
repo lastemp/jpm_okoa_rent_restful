@@ -884,7 +884,7 @@ fn get_menu_1_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 		return response_data.to_string()
 		
 	}
-	else if text.contains("*") == false {
+	else if !text.contains("*") {
 		let mut sub_menu_data = String::from("");
 		let sub_menu_1 = String::from("Enter Tenant Code");
 		//let sub_menu_2 = String::from("Enter 00 to go to previous Menu");
@@ -996,29 +996,50 @@ fn get_menu_1_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 						
 						let is_valid = validate_numeric(&amount);//validate_minimum_amount
 						
-						if !is_valid {
-							let response_data = "Please note that you entered invalid amount.";
-							let response_data = generate_ussd_response_message(&response_data.to_string(), false);
-			
-							return response_data.to_string()
+						if !is_valid {							
+							let mut sub_menu_data = String::from("");
+							let sub_menu_1 = String::from("Please note that you entered invalid amount.");
+							let sub_menu_2 = String::from("0:Back 00:Home");
+							
+							sub_menu_data.push_str(&sub_menu_1);
+							sub_menu_data.push_str("\n");
+							sub_menu_data.push_str(&sub_menu_2);
+							
+							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
+							return sub_menu_data.to_string()
 						}
 						
 						let is_valid = validate_minimum_amount(&amount);
 						
-						if !is_valid {
-							let response_data = "Please note that the minimum amount is Ksh 100.";
-							let response_data = generate_ussd_response_message(&response_data.to_string(), false);
-			
-							return response_data.to_string()
+						if !is_valid {							
+							let mut sub_menu_data = String::from("");
+							let sub_menu_1 = String::from("Please note that the minimum amount is Ksh 100.");
+							let sub_menu_2 = String::from("0:Back 00:Home");
+							
+							sub_menu_data.push_str(&sub_menu_1);
+							sub_menu_data.push_str("\n");
+							sub_menu_data.push_str(&sub_menu_2);
+							
+							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
+							return sub_menu_data.to_string()
 						}
 						
 						let is_valid = validate_maximum_amount(&amount);
 						
 						if !is_valid {
-							let response_data = "Please note that the maximum amount is Ksh 15,000.";
-							let response_data = generate_ussd_response_message(&response_data.to_string(), false);
-			
-							return response_data.to_string()
+							let mut sub_menu_data = String::from("");
+							let sub_menu_1 = String::from("Please note that the maximum amount is Ksh 15,000.");
+							let sub_menu_2 = String::from("0:Back 00:Home");
+							
+							sub_menu_data.push_str(&sub_menu_1);
+							sub_menu_data.push_str("\n");
+							sub_menu_data.push_str(&sub_menu_2);
+							
+							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
+							return sub_menu_data.to_string()
 						}
 						
 						let tenant_code = String::from(v[1]);
@@ -1097,9 +1118,16 @@ fn get_menu_1_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 							return sub_menu_data.to_string()
 						}
 						else {
-							sub_menu_data = wrong_selection_data.to_string();
-							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, false);
+							let mut sub_menu_data = String::from("");
+							let sub_menu_1 = wrong_selection_data.to_string();
+							let sub_menu_2 = String::from("0:Back 00:Home");
 							
+							sub_menu_data.push_str(&sub_menu_1);
+							sub_menu_data.push_str("\n");
+							sub_menu_data.push_str(&sub_menu_2);
+							
+							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
 							return sub_menu_data.to_string()
 						}
 						
@@ -1200,7 +1228,7 @@ fn get_menu_2_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 		return response_data.to_string()
 		
 	}
-	else if text.contains("*") == false {
+	else if !text.contains("*") {
 		let mut sub_menu_data = String::from("");
 		let sub_menu_1 = String::from("Enter Mortgagor Code");
 		//let sub_menu_2 = String::from("Enter 00 to go to previous Menu");
@@ -1294,28 +1322,49 @@ fn get_menu_2_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 						let is_valid = validate_numeric(&amount);//validate_minimum_amount
 						
 						if !is_valid {
-							let response_data = "Please note that you entered invalid amount.";
-							let response_data = generate_ussd_response_message(&response_data.to_string(), false);
-			
-							return response_data.to_string()
+							let mut sub_menu_data = String::from("");
+							let sub_menu_1 = String::from("Please note that you entered invalid amount.");
+							let sub_menu_2 = String::from("0:Back 00:Home");
+							
+							sub_menu_data.push_str(&sub_menu_1);
+							sub_menu_data.push_str("\n");
+							sub_menu_data.push_str(&sub_menu_2);
+							
+							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
+							return sub_menu_data.to_string()
 						}
 						
 						let is_valid = validate_minimum_amount(&amount);
 						
 						if !is_valid {
-							let response_data = "Please note that the minimum amount is Ksh 100.";
-							let response_data = generate_ussd_response_message(&response_data.to_string(), false);
-			
-							return response_data.to_string()
+							let mut sub_menu_data = String::from("");
+							let sub_menu_1 = String::from("Please note that the minimum amount is Ksh 100.");
+							let sub_menu_2 = String::from("0:Back 00:Home");
+							
+							sub_menu_data.push_str(&sub_menu_1);
+							sub_menu_data.push_str("\n");
+							sub_menu_data.push_str(&sub_menu_2);
+							
+							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
+							return sub_menu_data.to_string()
 						}
 						
 						let is_valid = validate_maximum_amount(&amount);
 						
 						if !is_valid {
-							let response_data = "Please note that the maximum amount is Ksh 15,000.";
-							let response_data = generate_ussd_response_message(&response_data.to_string(), false);
-			
-							return response_data.to_string()
+							let mut sub_menu_data = String::from("");
+							let sub_menu_1 = String::from("Please note that the maximum amount is Ksh 15,000.");
+							let sub_menu_2 = String::from("0:Back 00:Home");
+							
+							sub_menu_data.push_str(&sub_menu_1);
+							sub_menu_data.push_str("\n");
+							sub_menu_data.push_str(&sub_menu_2);
+							
+							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
+							return sub_menu_data.to_string()
 						}
 						
 						let mortgagor_code = String::from(v[1]);
@@ -1375,9 +1424,16 @@ fn get_menu_2_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 							return sub_menu_data.to_string()
 						}
 						else {
-							sub_menu_data = wrong_selection_data.to_string();
-							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, false);
+							let mut sub_menu_data = String::from("");
+							let sub_menu_1 = wrong_selection_data.to_string();
+							let sub_menu_2 = String::from("0:Back 00:Home");
 							
+							sub_menu_data.push_str(&sub_menu_1);
+							sub_menu_data.push_str("\n");
+							sub_menu_data.push_str(&sub_menu_2);
+							
+							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
 							return sub_menu_data.to_string()
 						}
 						
@@ -1452,7 +1508,7 @@ fn get_menu_3_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 		return response_data.to_string()
 		
 	}
-	else if text.contains("*") == false {
+	else if !text.contains("*") {
 		let mut sub_menu_data = String::from("");
 		let sub_menu_1 = String::from("Enter the OKOA RENT\\MORTGAGE Number");
 		//let sub_menu_2 = String::from("Enter 00 to go to previous Menu");
@@ -1544,9 +1600,16 @@ fn get_menu_3_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 							return sub_menu_data.to_string()
 						}
 						else {
-							sub_menu_data = wrong_selection_data.to_string();
-							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, false);
+							let mut sub_menu_data = String::from("");
+							let sub_menu_1 = wrong_selection_data.to_string();
+							let sub_menu_2 = String::from("0:Back 00:Home");
 							
+							sub_menu_data.push_str(&sub_menu_1);
+							sub_menu_data.push_str("\n");
+							sub_menu_data.push_str(&sub_menu_2);
+							
+							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
 							return sub_menu_data.to_string()
 						}
 						
@@ -1570,7 +1633,7 @@ fn get_menu_3_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 							let sub_menu_3 = String::from("THANK YOU FOR USING OKOA RENT\\MORTGAGE. ");
 							let sub_menu_4 = String::from("You can now access OKOA RENT\\MORTGAGE via App.");
 							//let sub_menu_5 = String::from("Enter 00 to go to previous Menu");
-							let sub_menu_5 = String::from("0:Back 00:Home");
+							let sub_menu_5 = String::from("00:Home");
 							
 							let rent_mortgage_code = String::from(v[1]);
 							
@@ -1616,7 +1679,7 @@ fn get_menu_4_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 		return response_data.to_string()
 		
 	}
-	else if text.contains("*") == false {
+	else if !text.contains("*") {
 		let mut sub_menu_data = String::from("");
 		let sub_menu_1 = String::from("Enter the OKOA RENT\\MORTGAGE Number");
 		//let sub_menu_2 = String::from("Enter 00 to go to previous Menu");
@@ -1686,28 +1749,49 @@ fn get_menu_4_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 						let is_valid = validate_numeric(&amount);//validate_minimum_amount
 						
 						if !is_valid {
-							let response_data = "Please note that you entered invalid amount.";
-							let response_data = generate_ussd_response_message(&response_data.to_string(), false);
-			
-							return response_data.to_string()
+							let mut sub_menu_data = String::from("");
+							let sub_menu_1 = String::from("Please note that you entered invalid amount.");
+							let sub_menu_2 = String::from("0:Back 00:Home");
+							
+							sub_menu_data.push_str(&sub_menu_1);
+							sub_menu_data.push_str("\n");
+							sub_menu_data.push_str(&sub_menu_2);
+							
+							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
+							return sub_menu_data.to_string()
 						}
 						
 						let is_valid = validate_minimum_amount(&amount);
 						
 						if !is_valid {
-							let response_data = "Please note that the minimum amount is Ksh 100.";
-							let response_data = generate_ussd_response_message(&response_data.to_string(), false);
-			
-							return response_data.to_string()
+							let mut sub_menu_data = String::from("");
+							let sub_menu_1 = String::from("Please note that the minimum amount is Ksh 100.");
+							let sub_menu_2 = String::from("0:Back 00:Home");
+							
+							sub_menu_data.push_str(&sub_menu_1);
+							sub_menu_data.push_str("\n");
+							sub_menu_data.push_str(&sub_menu_2);
+							
+							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
+							return sub_menu_data.to_string()
 						}
 						
 						let is_valid = validate_maximum_amount(&amount);
 						
 						if !is_valid {
-							let response_data = "Please note that the maximum amount is Ksh 15,000.";
-							let response_data = generate_ussd_response_message(&response_data.to_string(), false);
-			
-							return response_data.to_string()
+							let mut sub_menu_data = String::from("");
+							let sub_menu_1 = String::from("Please note that the maximum amount is Ksh 15,000.");
+							let sub_menu_2 = String::from("0:Back 00:Home");
+							
+							sub_menu_data.push_str(&sub_menu_1);
+							sub_menu_data.push_str("\n");
+							sub_menu_data.push_str(&sub_menu_2);
+							
+							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
+							return sub_menu_data.to_string()
 						}
 						
 						let rent_mortgage_code = String::from(v[1]);
@@ -1764,9 +1848,16 @@ fn get_menu_4_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 							return sub_menu_data.to_string()
 						}
 						else {
-							sub_menu_data = wrong_selection_data.to_string();
-							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, false);
+							let mut sub_menu_data = String::from("");
+							let sub_menu_1 = wrong_selection_data.to_string();
+							let sub_menu_2 = String::from("0:Back 00:Home");
 							
+							sub_menu_data.push_str(&sub_menu_1);
+							sub_menu_data.push_str("\n");
+							sub_menu_data.push_str(&sub_menu_2);
+							
+							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
 							return sub_menu_data.to_string()
 						}
 						
@@ -1836,7 +1927,7 @@ fn get_menu_5_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 		return response_data.to_string()
 		
 	}
-	else if text.contains("*") == false {
+	else if !text.contains("*") {
 		let mut sub_menu_data = String::from("");
 		let sub_menu_1 = String::from("Please select type of statement.");
 		let sub_menu_2 = String::from("1. Full Statement");
@@ -1967,9 +2058,23 @@ fn get_menu_5_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 							return sub_menu_data.to_string()
 						}
 						else {
+							/*
 							sub_menu_data = wrong_selection_data.to_string();
 							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, false);
 							
+							return sub_menu_data.to_string()
+							*/
+							
+							let mut sub_menu_data = String::from("");
+							let sub_menu_1 = wrong_selection_data.to_string();
+							let sub_menu_2 = String::from("0:Back 00:Home");
+							
+							sub_menu_data.push_str(&sub_menu_1);
+							sub_menu_data.push_str("\n");
+							sub_menu_data.push_str(&sub_menu_2);
+							
+							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
 							return sub_menu_data.to_string()
 						}
 						
@@ -1998,7 +2103,7 @@ fn get_menu_1_sub_menu_data_unregistered_client(data: &web::Data<Pool>, mobile_n
 	else if !text.contains("*") {
 		let mut sub_menu_data = String::from("");
 		let sub_menu_1 = String::from("Enter National ID number");
-		let sub_menu_2 = String::from("0:Back 00:Home");
+		let sub_menu_2 = String::from("00:Home");
 		
 		sub_menu_data.push_str(&sub_menu_1);
 		sub_menu_data.push_str("\n");
@@ -2027,18 +2132,54 @@ fn get_menu_1_sub_menu_data_unregistered_client(data: &web::Data<Pool>, mobile_n
 				2 => //Index 1
 					{
 						let national_id = String::from(v[1]);
+						let national_id = national_id.replace(" ","");
 						
-						if national_id.replace(" ","").len() == 0 {
+						if national_id.len() == 0 {
 							let response_data = "Please note that you did not enter national ID number.";
 							let response_data = generate_ussd_response_message(&response_data.to_string(), false);
 			
 							return response_data.to_string()
+						}	
+						else if national_id.len() == 7 || national_id.len() == 8 {
+						}
+						else {
+							let mut sub_menu_data = String::from("");
+							let sub_menu_1 = String::from("Please note that national ID number must have 7 or 8 digits.");
+							let sub_menu_2 = String::from("00:Home");
+							
+							sub_menu_data.push_str(&sub_menu_1);
+							sub_menu_data.push_str("\n");
+							sub_menu_data.push_str(&sub_menu_2);
+							
+							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
+							return sub_menu_data.to_string()
+						}
+							
+						let valid_national_id = 
+							match national_id.parse::<i64>() {
+							  Ok(a) => { if a > 0 {true} else {false} },
+							  Err(e) => false,
+						};
+						
+						if !valid_national_id {
+							let mut sub_menu_data = String::from("");
+							let sub_menu_1 = String::from("Please note that national ID number must contain digits only.");
+							let sub_menu_2 = String::from("00:Home");
+							
+							sub_menu_data.push_str(&sub_menu_1);
+							sub_menu_data.push_str("\n");
+							sub_menu_data.push_str(&sub_menu_2);
+							
+							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
+							return sub_menu_data.to_string()
 						}
 						
 						let mut sub_menu_data = String::from("");
 						let sub_menu_1 = String::from("Enter Full Names");
 						let sub_menu_2 = String::from("eg Firstname Lastname");
-						let sub_menu_3 = String::from("0:Back 00:Home");
+						let sub_menu_3 = String::from("00:Home");
 						
 						sub_menu_data.push_str(&sub_menu_1);
 						sub_menu_data.push_str("\n");
@@ -2061,9 +2202,24 @@ fn get_menu_1_sub_menu_data_unregistered_client(data: &web::Data<Pool>, mobile_n
 							return response_data.to_string()
 						}
 						
+						if !full_names.contains(" ") {
+			
+							let mut sub_menu_data = String::from("");
+							let sub_menu_1 = String::from("Please enter firstname and lastname separated with a space.");
+							let sub_menu_2 = String::from("00:Home");
+							
+							sub_menu_data.push_str(&sub_menu_1);
+							sub_menu_data.push_str("\n");
+							sub_menu_data.push_str(&sub_menu_2);
+							
+							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
+							return sub_menu_data.to_string()
+						}
+						
 						let mut sub_menu_data = String::from("");
 						let sub_menu_1 = String::from("Enter House Code");
-						let sub_menu_2 = String::from("0:Back 00:Home");
+						let sub_menu_2 = String::from("00:Home");
 						
 						sub_menu_data.push_str(&sub_menu_1);
 						sub_menu_data.push_str("\n");
@@ -2087,6 +2243,7 @@ fn get_menu_1_sub_menu_data_unregistered_client(data: &web::Data<Pool>, mobile_n
 						
 						let national_id = String::from(v[1]);
 						let full_names = String::from(v[2]);
+						let full_names = full_names.to_uppercase();
 						
 						let mut sub_menu_data = String::from("");
 						let sub_menu_1 = String::from("Please confirm self registration details.");
@@ -2140,6 +2297,8 @@ fn get_menu_1_sub_menu_data_unregistered_client(data: &web::Data<Pool>, mobile_n
 							let full_names = String::from(v[2]);
 							let house_code = String::from(v[3]);
 							
+							let full_names = full_names.to_uppercase();
+							
 							create_self_registration_data(data, national_id, full_names, house_code, mobile_no.to_string());
 							
 							sub_menu_data.push_str(&sub_menu_1);
@@ -2153,9 +2312,17 @@ fn get_menu_1_sub_menu_data_unregistered_client(data: &web::Data<Pool>, mobile_n
 							return sub_menu_data.to_string()
 						}
 						else {
-							sub_menu_data = wrong_selection_data.to_string();
-							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, false);
+							let mut sub_menu_data = String::from("");
+							let sub_menu_1 = wrong_selection_data.to_string();
+							//let sub_menu_2 = String::from("0:Back 00:Home");
+							let sub_menu_2 = String::from("00:Home");
 							
+							sub_menu_data.push_str(&sub_menu_1);
+							sub_menu_data.push_str("\n");
+							sub_menu_data.push_str(&sub_menu_2);
+							
+							let sub_menu_data = generate_ussd_response_message(&sub_menu_data, true);
+
 							return sub_menu_data.to_string()
 						}
 						
