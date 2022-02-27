@@ -1,6 +1,8 @@
 extern crate base64;
 
 mod db_layer;
+mod api_layer;
+
 use actix_web::{post, web, App, HttpServer, Responder};
 use serde::{Deserialize};//Serialize,
 //use base64::{encode, decode};
@@ -47,6 +49,22 @@ async fn process_ussd_actions(form: web::Form<InputData>, data: web::Data<Pool>)
 	
 	let is_registered = db_layer::get_ussd_registered_client(&data, &phone_number);
 	
+	//TESTS ONLY
+	/*
+	let _message: String = String::from("Good luck on your plans");
+	let _to: String = String::from("+2547xxxxxxxx");
+	let _from: String = String::from("AFRICASTKNG"); 
+	let user_name: String = String::from("lastemperor"); 
+	let api_key: String = String::from("be27db49f6d6ff9ffeff2c3729d728d90d0f1d7573a2c16f7f1d27b9024174fa");
+	let api_url: String = String::from("https://api.africastalking.com/version1/messaging");
+	
+	let _p = api_layer::send_sms_message(_message, _to, _from, user_name, api_key, api_url).await;
+	match _p
+	{
+        Ok(x) => println!("send_sms_message status - successful. {:?}", x),
+        Err(e) => println!("send_sms_message status. {:?}", e),
+    }
+	*/
 	if is_registered {
 		let response_data = process_client_requests(&data, &session_id, &phone_number, text);
 		
@@ -860,6 +878,18 @@ fn get_menu_3_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 							let rent_mortgage_code = String::from(v[1]);
 							
 							db_layer::create_check_balance_data(data, rent_mortgage_code, mobile_no.to_string());
+							
+							//TESTS ONLY
+							/*
+							let _message: String = String::from("Good luck on your plans");
+							let _to: String = String::from("+254723083761"); 
+							let _from: String = String::from("AFRICASTKNG"); 
+							let user_name: String = String::from("lastemperor"); 
+							let api_key: String = String::from("39b46d4ac89bbaa4d2fb5c0fee44e74ea53159326d9d1666ec519322735a132a"); 
+							let api_url: String = String::from("https://api.africastalking.com/version1/messaging");
+							
+							api_layer::send_sms_message(_message, _to, _from, user_name, api_key, api_url);
+							*/
 							
 							sub_menu_data.push_str(&sub_menu_1);
 							sub_menu_data.push_str(&sub_menu_2);
