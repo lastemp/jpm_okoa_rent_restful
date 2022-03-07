@@ -880,16 +880,28 @@ fn get_menu_3_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 							db_layer::create_check_balance_data(data, rent_mortgage_code, mobile_no.to_string());
 							
 							//TESTS ONLY
-							/*
+							///*
 							let _message: String = String::from("Good luck on your plans");
-							let _to: String = String::from("+254723083761"); 
+							let _to: String = String::from("+254722989675");
 							let _from: String = String::from("AFRICASTKNG"); 
 							let user_name: String = String::from("lastemperor"); 
-							let api_key: String = String::from("39b46d4ac89bbaa4d2fb5c0fee44e74ea53159326d9d1666ec519322735a132a"); 
+							let api_key: String = String::from("be27db49f6d6ff9ffeff2c3729d728d90d0f1d7573a2c16f7f1d27b9024174fa");
 							let api_url: String = String::from("https://api.africastalking.com/version1/messaging");
 							
-							api_layer::send_sms_message(_message, _to, _from, user_name, api_key, api_url);
+							tokio::spawn(async move {
+								// Process each request concurrently.
+								let _p = api_layer::send_sms_message(_message, _to, _from, user_name, api_key, api_url).await;
+							});
+							
+							/*
+							let _p = api_layer::send_sms_message(_message, _to, _from, user_name, api_key, api_url).await;
+							match _p
+							{
+								Ok(x) => println!("send_sms_message status - successful. {:?}", x),
+								Err(e) => println!("send_sms_message status. {:?}", e),
+							}
 							*/
+							//*/
 							
 							sub_menu_data.push_str(&sub_menu_1);
 							sub_menu_data.push_str(&sub_menu_2);

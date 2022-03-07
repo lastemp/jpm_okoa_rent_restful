@@ -73,10 +73,11 @@ pub async fn send_sms_message(_message: String, _to: String, _from: String, user
 		.header(ACCEPT, "application/json")
 		.header("apiKey", api_key)
 		.form(&params)
-		//.send();
 		.send()
-		.await?;
+		//.await?; //The "?" after the await returns errors immediately and hence will not be captured on match clause below
+		.await;
 		
+		/*
 		println!("Response status {}", res.status());
 		
 		if res.status() == StatusCode::CREATED {
@@ -87,44 +88,72 @@ pub async fn send_sms_message(_message: String, _to: String, _from: String, user
 
 			println!("Response struct {:?}", my_output);
 		}
-		
+		*/
+	
 		/*
-		//StatusCode::OK => println!("success!"),
 		match res.status() {
-			StatusCode::OK => {
-				//println!("success: {:?}", res)
-				let p: ResultSendSmsMessage = res.unwrap();
-				println!("The name is {}", p);
-			},
-			StatusCode::PAYLOAD_TOO_LARGE => {
-				println!("Request payload is too large!");
+			StatusCode::CREATED => {
+				println!("Response status {}", res.status());
+				let my_output = res
+				.json::<ResultSendSmsMessage>()
+				.await?;
+
+				println!("Response struct {:?}", my_output);
 			}
 			s => println!("Received response status: {:?}", s),
 		};
 		*/
 		
-		Ok(())
-	/*	
-	System::new().block_on(async {
-		//let builder = SslConnector::builder(SslMethod::tls()).unwrap();
-		let params = [("username", user_name), ("to", _to), ("message", _message), ("from", _from)];
-        //let client = Client::default();
-		
-		//let client = Client::build()
-			//.connector(Connector::new().ssl(builder.build()).finish())
-			//.finish();
-		
-		let client = awc::Client::build()
-			.connector(awc::Connector::new().ssl(builder.build()).finish())
-			.finish();
-        let res = client
-            .post(api_url)                      // <- Create request builder
-			.header("Accept", "application/json")
-            .header("apiKey", api_key)
-            .send_form(&params)                 // <- Send http request
-            .await;
+		match res {
+			   Err(e) => {
+						println!("server not responding");
+					   },
+			   Ok(response) => {
+						match response.status() {
+							StatusCode::CREATED => {
+								println!("Response status {}", response.status());
+								let my_output = response
+								.json::<ResultSendSmsMessage>()
+								.await?;
 
-        println!("Response: {:?}", res);        // <- server http response
-    });	
-	*/
+								fetch_sms_message_result(my_output);
+							}
+							s => println!("Received response status: {:?}", s),
+						}
+			   }, 
+		};
+		
+		Ok(())
+}
+
+fn fetch_sms_message_result(result_message: ResultSendSmsMessage) {
+	println!("fetch_sms_message_result: struct {:?}", result_message);
+}
+
+pub fn send_sms_message_sync(_message: String, _to: String, _from: String, user_name: String, api_key: String, api_url: String) -> std::result::Result<(), reqwest::Error> {
+		
+	let params = [("username", user_name), ("to", _to), ("message", _message)];
+	let client = reqwest::blocking::Client::new();
+	let res = client.post(api_url)
+		.header(CONTENT_TYPE, "application/x-www-form-urlencoded")
+		.header(ACCEPT, "application/json")
+		.header("apiKey", api_key)
+		.form(&params)
+		.send()?;
+		/*
+		match res.status() {
+			StatusCode::CREATED => {
+				println!("Response status {}", res.status());
+				let my_output = res
+				.json::<ResultSendSmsMessage>();
+				//.await?;
+
+				println!("Response struct {:?}", my_output);
+			}
+			s => println!("Received response status: {:?}", s),
+		};
+		*/
+		println!("Response status {}", res.status());
+		
+		Ok(())
 }
