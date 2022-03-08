@@ -127,7 +127,33 @@ pub async fn send_sms_message(_message: String, _to: String, _from: String, user
 }
 
 fn fetch_sms_message_result(result_message: ResultSendSmsMessage) {
+	let k = String::from(""); //Default value for string variables.i32
+	let m: i32 = 0; //Default value for i32 variables.
+	let _message = &result_message.SMSMessageData.Message.as_ref().unwrap_or(&k);
+	let _recipients = &result_message.SMSMessageData.Recipients;
+	
 	println!("fetch_sms_message_result: struct {:?}", result_message);
+	
+	let x = _recipients.len();
+	
+	if x > 0 {
+		for _recipient in _recipients.iter() {
+			let _message_id = &_recipient.messageId.as_ref().unwrap_or(&k);
+			let _number = &_recipient.number.as_ref().unwrap_or(&k);
+			let status_code = &_recipient.statusCode.as_ref().unwrap_or(&m);
+			let _status = &_recipient.status.as_ref().unwrap_or(&k);
+			let _cost = &_recipient.cost.as_ref().unwrap_or(&k);
+			
+			/*
+			println!("message_id {:?}", _message_id);
+			println!("number {:?}", _number);
+			println!("status_code {:?}", status_code);
+			println!("status {:?}", _status);
+			println!("cost {:?}", _cost);
+			*/
+		}
+	}
+
 }
 
 pub fn send_sms_message_sync(_message: String, _to: String, _from: String, user_name: String, api_key: String, api_url: String) -> std::result::Result<(), reqwest::Error> {

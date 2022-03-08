@@ -881,12 +881,28 @@ fn get_menu_3_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 							
 							//TESTS ONLY
 							///*
-							let _message: String = String::from("Good luck on your plans");
-							let _to: String = String::from("+254722989675");
-							let _from: String = String::from("AFRICASTKNG"); 
+							//let _message: String = String::from("Good luck on your plans");
+							let mut _message = String::from("");
+							let mut _to: String = String::from("");
+							let _from: String = String::from("AFRICASTKNG");
 							let user_name: String = String::from("lastemperor"); 
 							let api_key: String = String::from("be27db49f6d6ff9ffeff2c3729d728d90d0f1d7573a2c16f7f1d27b9024174fa");
 							let api_url: String = String::from("https://api.africastalking.com/version1/messaging");
+							
+							let msg_1 = String::from("Dear Customer, your wallet account balance is Ksh 13,650.00. ");
+							let msg_2 = String::from("Transaction fee is Ksh 1.00. ");
+							let msg_3 = String::from("THANK YOU FOR USING OKOA RENT\\MORTGAGE. ");
+							let msg_4 = String::from("You can now access OKOA RENT\\MORTGAGE via App.");
+							
+							_message.push_str(&msg_1);
+							_message.push_str(&msg_2);
+							_message.push_str(&msg_3);
+							_message.push_str(&msg_4);
+							
+							if !mobile_no.contains("+") {
+								_to.push_str("+");
+								_to.push_str(&mobile_no);
+							}
 							
 							tokio::spawn(async move {
 								// Process each request concurrently.
