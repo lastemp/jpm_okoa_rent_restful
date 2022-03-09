@@ -161,6 +161,27 @@ pub fn create_self_registration_data(data: &web::Data<Pool>, national_id_no: Str
 	successful
 }
 
+pub fn create_outgoing_sms_message_data(data: &web::Data<Pool>, sms_message: String, _to: String, _from: String, _message: String, message_id: String, _number: String, status_code: i32, _status: String, _cost: String) -> bool  {
+	let mut successful: bool = false;
+	
+	match data
+        .get_conn()
+		.and_then(|mut conn| insert_outgoing_sms_message_data(&mut conn, sms_message, _to, _from, _message, message_id, _number, status_code, _status, _cost))
+    {
+        Ok(x) => {
+			if x > 0 {
+				successful = true;
+			}
+			else {
+				successful = false;
+			}
+        },
+        Err(e) => println!("Failed to open DB connection. {:?}", e),
+    }
+	
+	successful
+}
+
 pub fn get_ussd_session_details(data: &web::Data<Pool>, session_id: &String, phone_number: &String) -> String  {
 	let mut caller_action: String = String::from("");
 	
@@ -321,6 +342,27 @@ fn insert_self_registration_data(
             "full_names" => full_names,
             "house_code" => house_code,
             "mobile_no" => mobile_no,
+        },
+    )
+	.and_then(|_| Ok(conn.last_insert_id()))
+}
+
+fn insert_outgoing_sms_message_data(
+    conn: &mut PooledConn, sms_message: String, _to: String, _from: String, _message: String, message_id: String, _number: String, status_code: i32, _status: String, _cost: String) -> std::result::Result<u64, mysql::error::Error> {
+	
+	// Now let's insert data to the database
+	conn.exec_drop(
+        "insert into outgoingsmsmessagedatarequests (smsmessage, recipientmobileno, senderidname, message, messageid, recipientnumber, statuscode, statusmessage, cost) values (:sms_message, :_to, :_from, :_message, :message_id, :_number, :status_code, :_status, :_cost);",
+        params! {
+            "sms_message" => sms_message,
+            "_to" => _to,
+            "_from" => _from,
+            "_message" => _message,
+			"message_id" => message_id,
+			"_number" => _number,
+			"status_code" => status_code,
+			"_status" => _status,
+			"_cost" => _cost,
         },
     )
 	.and_then(|_| Ok(conn.last_insert_id()))

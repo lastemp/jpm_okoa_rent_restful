@@ -9,6 +9,8 @@ use serde::{Deserialize};//Serialize,
 use std::str;
 use mysql::*;
 //use mysql::prelude::*;
+use reqwest::StatusCode;
+//use std::sync::Arc;
 
 #[derive(Deserialize)]
 struct InputData {
@@ -17,6 +19,27 @@ struct InputData {
 	networkCode: Option<String>,
 	serviceCode: Option<String>,
 	text: Option<String>,
+}
+
+#[derive(Deserialize, Debug)]
+struct Recipients {
+    messageId: Option<String>,
+	number: Option<String>,
+	statusCode: Option<i32>,
+	status: Option<String>,
+	cost: Option<String>,
+}
+
+#[derive(Deserialize, Debug)]
+struct SMSMessageData {
+    Message: Option<String>,
+	Recipients: Vec<Recipients>,
+}
+
+#[derive(Deserialize, Debug)]
+struct ResultSendSmsMessage {
+    Id: Option<String>,
+	SMSMessageData: SMSMessageData,
 }
 
 async fn greet() -> impl Responder {
@@ -879,8 +902,6 @@ fn get_menu_3_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 							
 							db_layer::create_check_balance_data(data, rent_mortgage_code, mobile_no.to_string());
 							
-							//TESTS ONLY
-							///*
 							//let _message: String = String::from("Good luck on your plans");
 							let mut _message = String::from("");
 							let mut _to: String = String::from("");
@@ -894,30 +915,29 @@ fn get_menu_3_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 							let msg_3 = String::from("THANK YOU FOR USING OKOA RENT\\MORTGAGE. ");
 							let msg_4 = String::from("You can now access OKOA RENT\\MORTGAGE via App.");
 							
+							/*
 							_message.push_str(&msg_1);
 							_message.push_str(&msg_2);
 							_message.push_str(&msg_3);
 							_message.push_str(&msg_4);
+							*/
+							_message.push_str(&msg_1);
 							
 							if !mobile_no.contains("+") {
 								_to.push_str("+");
 								_to.push_str(&mobile_no);
 							}
 							
+							let data_1 = data.clone();
+							
+							//let _handle = tokio::spawn(async move {
 							tokio::spawn(async move {
 								// Process each request concurrently.
-								let _p = api_layer::send_sms_message(_message, _to, _from, user_name, api_key, api_url).await;
+								let _res = api_layer::send_sms_message(data_1, _message, _to, _from, user_name, api_key, api_url).await;
+								
+								//println!("Received response status: {:?}", _res)
+								
 							});
-							
-							/*
-							let _p = api_layer::send_sms_message(_message, _to, _from, user_name, api_key, api_url).await;
-							match _p
-							{
-								Ok(x) => println!("send_sms_message status - successful. {:?}", x),
-								Err(e) => println!("send_sms_message status. {:?}", e),
-							}
-							*/
-							//*/
 							
 							sub_menu_data.push_str(&sub_menu_1);
 							sub_menu_data.push_str(&sub_menu_2);
@@ -1810,6 +1830,42 @@ fn process_unregistered_client_requests(data: &web::Data<Pool>, session_id: &Str
 		let response_data = get_sub_menu_data_unregistered_client(&data, &phone_number, &caller_action);
 		
 		return response_data
+	}
+}
+
+fn fetch_sms_message_result(data: &web::Data<Pool>, sms_message: String, _to: String, _from: String, result_message: ResultSendSmsMessage) {
+	let k = String::from(""); //Default value for string variables.i32
+	let m: i32 = 0; //Default value for i32 variables.
+	let _message = &result_message.SMSMessageData.Message.as_ref().unwrap_or(&k);
+	let _recipients = &result_message.SMSMessageData.Recipients;
+	
+	println!("fetch_sms_message_result: struct {:?}", result_message);
+	
+	let x = _recipients.len();
+	
+	if x > 0 {
+		for _recipient in _recipients.iter() {
+			let message_id = &_recipient.messageId.as_ref().unwrap_or(&k);
+			let _number = &_recipient.number.as_ref().unwrap_or(&k);
+			let status_code = _recipient.statusCode.as_ref().unwrap_or(&m);
+			let _status = &_recipient.status.as_ref().unwrap_or(&k);
+			let _cost = &_recipient.cost.as_ref().unwrap_or(&k);
+			
+			let status_code = *status_code;
+			let sms_message_1: String = sms_message.to_string();
+			let to_1: String = _to.to_string();
+			let from_1: String = _from.to_string();
+			
+			db_layer::create_outgoing_sms_message_data(&data, sms_message_1, to_1, from_1, _message.to_string(), message_id.to_string(), _number.to_string(), status_code, _status.to_string(), _cost.to_string());
+			
+			/*
+			println!("message_id {:?}", message_id);
+			println!("number {:?}", _number);
+			println!("status_code {:?}", status_code);
+			println!("status {:?}", _status);
+			println!("cost {:?}", _cost);
+			*/
+		}
 	}
 }
 
