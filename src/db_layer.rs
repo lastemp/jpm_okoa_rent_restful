@@ -214,6 +214,28 @@ pub fn get_ussd_registered_client(data: &web::Data<Pool>, phone_number: &String)
 	is_registered
 }
 
+pub fn get_settings_details(data: &web::Data<Pool>, param_key: String) -> String  {
+	let mut param_value: String = String::from("");
+	
+	if param_key.len() == 0 {
+		return param_value
+	}
+	
+	let param_key = param_key.to_lowercase();
+	
+	match data
+        .get_conn()
+		.and_then(|mut conn| select_settings_details(&mut conn, param_key.to_string()))
+    {
+        Ok(x) => {
+			param_value = x;
+        },
+        Err(e) => println!("Failed to open DB connection. {:?}", e),
+    }
+	
+	param_value
+}
+
 fn insert_ussd_session_details(
     conn: &mut PooledConn, session_id: String, caller_number: String, caller_action: String) -> std::result::Result<u64, mysql::error::Error> {
 	
@@ -398,5 +420,21 @@ fn select_registered_client_details(
             my_count = count,
     )
 	.and_then(|_| Ok(my_count))
+	
+}
+
+fn select_settings_details(
+    conn: &mut PooledConn, param_key: String) -> std::result::Result<String, mysql::error::Error> {
+	let mut param_value: String = String::from("");
+	
+    conn.exec_map(
+        "select (case when :paramkey = 'apikeysmsprsp' then coalesce(apikeysmsprsp,'') when :paramkey = 'usernamesmsprsp' then coalesce(usernamesmsprsp,'') when :paramkey = 'senderidsmsprsp' then coalesce(senderidsmsprsp,'') when :paramkey = 'urlsmsprsp' then coalesce(urlsmsprsp,'') else '' end) as paramvalue from settings limit 1;",
+		params! {
+				"paramkey" => param_key,
+			},
+        |paramvalue|
+            param_value = paramvalue,
+    )
+	.and_then(|_| Ok(param_value))
 	
 }

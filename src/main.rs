@@ -9,7 +9,7 @@ use serde::{Deserialize};//Serialize,
 use std::str;
 use mysql::*;
 //use mysql::prelude::*;
-use reqwest::StatusCode;
+//use reqwest::StatusCode;
 //use std::sync::Arc;
 
 #[derive(Deserialize)]
@@ -20,7 +20,7 @@ struct InputData {
 	serviceCode: Option<String>,
 	text: Option<String>,
 }
-
+/*
 #[derive(Deserialize, Debug)]
 struct Recipients {
     messageId: Option<String>,
@@ -41,7 +41,7 @@ struct ResultSendSmsMessage {
     Id: Option<String>,
 	SMSMessageData: SMSMessageData,
 }
-
+*/
 async fn greet() -> impl Responder {
 	format!("")
 }
@@ -902,13 +902,12 @@ fn get_menu_3_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 							
 							db_layer::create_check_balance_data(data, rent_mortgage_code, mobile_no.to_string());
 							
-							//let _message: String = String::from("Good luck on your plans");
 							let mut _message = String::from("");
 							let mut _to: String = String::from("");
-							let _from: String = String::from("AFRICASTKNG");
-							let user_name: String = String::from("lastemperor"); 
-							let api_key: String = String::from("be27db49f6d6ff9ffeff2c3729d728d90d0f1d7573a2c16f7f1d27b9024174fa");
-							let api_url: String = String::from("https://api.africastalking.com/version1/messaging");
+							let _from: String = db_layer::get_settings_details(data, String::from("senderidsmsprsp"));
+							let user_name: String = db_layer::get_settings_details(data, String::from("usernamesmsprsp"));
+							let api_key: String = db_layer::get_settings_details(data, String::from("apikeysmsprsp"));
+							let api_url: String = db_layer::get_settings_details(data, String::from("urlsmsprsp"));
 							
 							let msg_1 = String::from("Dear Customer, your wallet account balance is Ksh 13,650.00. ");
 							let msg_2 = String::from("Transaction fee is Ksh 1.00. ");
@@ -930,12 +929,9 @@ fn get_menu_3_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 							
 							let data_1 = data.clone();
 							
-							//let _handle = tokio::spawn(async move {
 							tokio::spawn(async move {
 								// Process each request concurrently.
-								let _res = api_layer::send_sms_message(data_1, _message, _to, _from, user_name, api_key, api_url).await;
-								
-								//println!("Received response status: {:?}", _res)
+								api_layer::send_sms_message(data_1, _message, _to, _from, user_name, api_key, api_url).await;
 								
 							});
 							
@@ -1832,7 +1828,7 @@ fn process_unregistered_client_requests(data: &web::Data<Pool>, session_id: &Str
 		return response_data
 	}
 }
-
+/*
 fn fetch_sms_message_result(data: &web::Data<Pool>, sms_message: String, _to: String, _from: String, result_message: ResultSendSmsMessage) {
 	let k = String::from(""); //Default value for string variables.i32
 	let m: i32 = 0; //Default value for i32 variables.
@@ -1868,7 +1864,7 @@ fn fetch_sms_message_result(data: &web::Data<Pool>, sms_message: String, _to: St
 		}
 	}
 }
-
+*/
 fn validate_numeric(input: &String) -> bool {
 	let mut is_valid: bool = false;
 	
