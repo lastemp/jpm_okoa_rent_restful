@@ -72,22 +72,6 @@ async fn process_ussd_actions(form: web::Form<InputData>, data: web::Data<Pool>)
 	
 	let is_registered = db_layer::get_ussd_registered_client(&data, &phone_number);
 	
-	//TESTS ONLY
-	/*
-	let _message: String = String::from("Good luck on your plans");
-	let _to: String = String::from("+2547xxxxxxxx");
-	let _from: String = String::from("AFRICASTKNG"); 
-	let user_name: String = String::from("lastemperor"); 
-	let api_key: String = String::from("be27db49f6d6ff9ffeff2c3729d728d90d0f1d7573a2c16f7f1d27b9024174fa");
-	let api_url: String = String::from("https://api.africastalking.com/version1/messaging");
-	
-	let _p = api_layer::send_sms_message(_message, _to, _from, user_name, api_key, api_url).await;
-	match _p
-	{
-        Ok(x) => println!("send_sms_message status - successful. {:?}", x),
-        Err(e) => println!("send_sms_message status. {:?}", e),
-    }
-	*/
 	if is_registered {
 		let response_data = process_client_requests(&data, &session_id, &phone_number, text);
 		
@@ -428,6 +412,35 @@ fn get_menu_1_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 							
 							db_layer::create_okoa_rent_data(data, tenant_code, house_code, amount, mobile_no.to_string());
 							
+							let mut _message = String::from("");
+							let mut _to: String = String::from("");
+							let _from: String = db_layer::get_settings_details(data, String::from("senderidsmsprsp"));
+							let user_name: String = db_layer::get_settings_details(data, String::from("usernamesmsprsp"));
+							let api_key: String = db_layer::get_settings_details(data, String::from("apikeysmsprsp"));
+							let api_url: String = db_layer::get_settings_details(data, String::from("urlsmsprsp"));
+
+							let msg_1 = String::from("Dear Customer, NCL7NRIUXP confirmed. We have sent Ksh 13,700.00 on 11/03/22 at 7:24 PM for your March 2022 Rent. ");
+							let msg_2 = String::from("New OKOA RENT balance is Ksh 43,646.22. ");
+							let msg_3 = String::from("Transaction cost, Ksh 43.00. Amount is payable next 3 Months at 5% Interest. ");
+							let msg_4 = String::from("You can now access OKOA RENT\\MORTGAGE via App.");
+							
+							_message.push_str(&msg_1);
+							_message.push_str(&msg_2);
+							_message.push_str(&msg_3);
+							_message.push_str(&msg_4);
+
+							if !mobile_no.contains("+") {
+								_to.push_str("+");
+								_to.push_str(&mobile_no);
+							}
+
+							let data_1 = data.clone();
+
+							tokio::spawn(async move {
+								// Process each request concurrently.
+								api_layer::send_sms_message(data_1, _message, _to, _from, user_name, api_key, api_url).await;
+							});
+							
 							sub_menu_data.push_str(&sub_menu_1);
 							sub_menu_data.push_str("\n");
 							sub_menu_data.push_str(&sub_menu_2);
@@ -733,6 +746,35 @@ fn get_menu_2_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 							
 							db_layer::create_okoa_mortgage_data(data, mortgagor_code, house_code, amount, mobile_no.to_string());
 							
+							let mut _message = String::from("");
+							let mut _to: String = String::from("");
+							let _from: String = db_layer::get_settings_details(data, String::from("senderidsmsprsp"));
+							let user_name: String = db_layer::get_settings_details(data, String::from("usernamesmsprsp"));
+							let api_key: String = db_layer::get_settings_details(data, String::from("apikeysmsprsp"));
+							let api_url: String = db_layer::get_settings_details(data, String::from("urlsmsprsp"));
+
+							let msg_1 = String::from("Dear Customer, OCH6TXZJW7 confirmed. We have sent Ksh 13,700.00 on 05/03/22 at 11:30 AM for your March 2022 Rent. ");
+							let msg_2 = String::from("New OKOA MORTGAGE balance is Ksh 43,646.22. ");
+							let msg_3 = String::from("Transaction cost, Ksh 43.00. Amount is payable next 3 Months at 5% Interest. ");
+							let msg_4 = String::from("You can now access OKOA RENT\\MORTGAGE via App.");
+							
+							_message.push_str(&msg_1);
+							_message.push_str(&msg_2);
+							_message.push_str(&msg_3);
+							_message.push_str(&msg_4);
+
+							if !mobile_no.contains("+") {
+								_to.push_str("+");
+								_to.push_str(&mobile_no);
+							}
+
+							let data_1 = data.clone();
+
+							tokio::spawn(async move {
+								// Process each request concurrently.
+								api_layer::send_sms_message(data_1, _message, _to, _from, user_name, api_key, api_url).await;
+							});
+							
 							sub_menu_data.push_str(&sub_menu_1);
 							sub_menu_data.push_str("\n");
 							sub_menu_data.push_str(&sub_menu_2);
@@ -914,13 +956,10 @@ fn get_menu_3_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 							let msg_3 = String::from("THANK YOU FOR USING OKOA RENT\\MORTGAGE. ");
 							let msg_4 = String::from("You can now access OKOA RENT\\MORTGAGE via App.");
 							
-							/*
 							_message.push_str(&msg_1);
 							_message.push_str(&msg_2);
 							_message.push_str(&msg_3);
 							_message.push_str(&msg_4);
-							*/
-							_message.push_str(&msg_1);
 							
 							if !mobile_no.contains("+") {
 								_to.push_str("+");
@@ -932,7 +971,6 @@ fn get_menu_3_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 							tokio::spawn(async move {
 								// Process each request concurrently.
 								api_layer::send_sms_message(data_1, _message, _to, _from, user_name, api_key, api_url).await;
-								
 							});
 							
 							sub_menu_data.push_str(&sub_menu_1);
@@ -1184,6 +1222,35 @@ fn get_menu_4_sub_menu_data(data: &web::Data<Pool>, mobile_no: &String, text: &S
 							};
 							
 							db_layer::create_pay_back_data(data, rent_mortgage_code, amount, mobile_no.to_string());
+							
+							let mut _message = String::from("");
+							let mut _to: String = String::from("");
+							let _from: String = db_layer::get_settings_details(data, String::from("senderidsmsprsp"));
+							let user_name: String = db_layer::get_settings_details(data, String::from("usernamesmsprsp"));
+							let api_key: String = db_layer::get_settings_details(data, String::from("apikeysmsprsp"));
+							let api_url: String = db_layer::get_settings_details(data, String::from("urlsmsprsp"));
+
+							let msg_1 = String::from("Dear Customer, OLT83RLN4T confirmed. You have paid your OKOA RENT\\MORTGAGE Ksh 13,700.00 on 12/03/22 at 10:30 AM, for account PGT-13GRED. ");
+							let msg_2 = String::from("New OKOA RENT\\MORTGAGE balance is Ksh 43,646.22. ");
+							let msg_3 = String::from("Transaction cost, Ksh 20.00. Amount you can transact within the day is Ksh 299,300.00. ");
+							let msg_4 = String::from("You can now access OKOA RENT\\MORTGAGE via App.");
+							
+							_message.push_str(&msg_1);
+							_message.push_str(&msg_2);
+							_message.push_str(&msg_3);
+							_message.push_str(&msg_4);
+
+							if !mobile_no.contains("+") {
+								_to.push_str("+");
+								_to.push_str(&mobile_no);
+							}
+
+							let data_1 = data.clone();
+
+							tokio::spawn(async move {
+								// Process each request concurrently.
+								api_layer::send_sms_message(data_1, _message, _to, _from, user_name, api_key, api_url).await;
+							});
 							
 							sub_menu_data.push_str(&sub_menu_1);
 							sub_menu_data.push_str("\n");
@@ -1597,6 +1664,31 @@ fn get_menu_1_sub_menu_data_unregistered_client(data: &web::Data<Pool>, mobile_n
 							let full_names = full_names.to_uppercase();
 							
 							db_layer::create_self_registration_data(data, national_id, full_names, house_code, mobile_no.to_string());
+							
+							let mut _message = String::from("");
+							let mut _to: String = String::from("");
+							let _from: String = db_layer::get_settings_details(data, String::from("senderidsmsprsp"));
+							let user_name: String = db_layer::get_settings_details(data, String::from("usernamesmsprsp"));
+							let api_key: String = db_layer::get_settings_details(data, String::from("apikeysmsprsp"));
+							let api_url: String = db_layer::get_settings_details(data, String::from("urlsmsprsp"));
+
+							let msg_1 = String::from("Dear Customer, welcome to OKOA RENT\\MORTGAGE. Your registration was successful. ");
+							let msg_2 = String::from("Login password: 1234.");
+							
+							_message.push_str(&msg_1);
+							_message.push_str(&msg_2);
+
+							if !mobile_no.contains("+") {
+								_to.push_str("+");
+								_to.push_str(&mobile_no);
+							}
+
+							let data_1 = data.clone();
+
+							tokio::spawn(async move {
+								// Process each request concurrently.
+								api_layer::send_sms_message(data_1, _message, _to, _from, user_name, api_key, api_url).await;
+							});
 							
 							sub_menu_data.push_str(&sub_menu_1);
 							sub_menu_data.push_str("\n");
