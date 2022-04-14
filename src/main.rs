@@ -2008,8 +2008,7 @@ fn validate_maximum_amount(input: &String) -> bool {
 }
 
 fn get_conn_url() -> String {
-	let url = "mysql://ussd:arunga@2030!@localhost:3306/okoa_rent";
-	//let url = "mysql://app1:23$)W.@9smtf!qp7@localhost:3306/okoa_rent"; cloud server
+	let url = "mysql://xxx:xxx@localhost:xxx/xxx";
 	String::from(url)
 }
 
