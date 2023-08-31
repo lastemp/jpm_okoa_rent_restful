@@ -1,7 +1,7 @@
 # jpm_okoa_rent_restful
 
-This RESTful Actix Web API system illustrates how to intergrate with [AfricasTalking USSD Gateway API](https://developers.africastalking.com/) and exchange messages.
-It is a USSD system accessed by clients through their phones to request an advance for rent or mortgage payments. 
+This RESTful Actix Web API is a USSD system accessed by clients through their phones to request an advance for rent or mortgage payments. 
+The system intergrates with [AfricasTalking USSD Gateway API](https://developers.africastalking.com/) and exchange messages.
 
 The RESTful Actix Web API has below listed dependencies:
 - [Actix Web](https://github.com/actix/actix-web) web framework for Rust
